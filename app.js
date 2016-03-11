@@ -1,7 +1,8 @@
 var express = require('express'),
-	app = express(),
-	nicknames = [];//kullanıcı listesi
-	writes=[];//yazıyor listesi
+	app = express();
+
+var nicknames = [];//kullanıcı listesi
+var	writes=[];//yazıyor listesi
 var port = process.env.PORT || 8080;
 
 var io = require('socket.io').listen(app.listen(port)); // this tells socket.io to use our express server
