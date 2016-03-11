@@ -1,0 +1,109 @@
+<html>
+<head>
+	<title>Chat with socket.io and node.js</title>
+	<style>
+		#chat{
+			height:500px;
+		}
+		#contentWrap{
+			display: none;
+		}
+		#chatWrap{
+			float: left;
+			border: 1px #000 solid;
+		}
+	</style>
+</head>
+<body>
+	<div id="nickWrap">
+		<p>Kullanıcı Adı Girin:</p>
+		<p id="nickError"></p>
+		<form id="setNick">
+			<input size="35" id="nickname"></input>
+			<input type="submit"></input>
+		</form>
+	</div>
+
+	<div id="contentWrap">
+		<div id="chatWrap">
+			<div id="chat"></div>
+            <div id="write"></div>
+			<form id="send-message">
+				<input size="35" id="message"></input>
+				<input type="submit"></input>
+			</form>
+		</div>
+		<div id="users"></div>
+	</div>
+	
+	<script src="http://code.jquery.com/jquery-latest.min.js"></script>
+	<script src="/socket.io/socket.io.js"></script>
+	<script>
+		jQuery(function($){
+			var socket = io.connect();
+			var $nickForm = $('#setNick');
+			var $nickError = $('#nickError');
+			var $nickBox = $('#nickname');
+			var $users = $('#users');
+			var $messageForm = $('#send-message');
+			var $messageBox = $('#message');
+			var $chat = $('#chat');
+			var $write = $('#write');
+			$nickForm.submit(function(e){
+				e.preventDefault();
+				socket.emit('new user', $nickBox.val(), function(data){
+					if(data){
+						$('#nickWrap').hide();
+						$('#contentWrap').show();
+					} else{
+						$nickError.html('Bu kullanıcı adı zaten var! Başka bir isim deneyin');
+					}
+				});
+				$nickBox.val('');
+			});
+			
+			socket.on('usernames', function(data){
+				var html = '';
+				for(i=0; i < data.length; i++){
+					html += data[i] + '<br/>'
+				}
+				$users.html(html);
+			});
+			socket.on('deleteNick', function(data){
+					var list="";
+					for(i=0; i < data.length; i++){
+						list += data[i]+","
+					}
+					if(list=="" || list==null)
+					{
+						$write.html('');
+						
+					}
+					else
+					{
+						$write.html(list+" yazıyor");
+					}
+			});
+			$messageForm.submit(function(e){
+				e.preventDefault();
+				socket.emit('send message', $messageBox.val());
+				$messageBox.val('');
+			});
+			
+			socket.on('new message', function(data){
+				$chat.append('<b>' + data.nick + ': </b>' + data.msg + "<br/>");
+			});
+			$messageBox.keypress(function(e){
+				socket.emit('write',$messageBox.val());
+			});
+			socket.on('writes', function(data){
+					var list="";
+					for(i=0; i < data.length; i++){
+						list += data[i]+","
+					} 
+					$write.html(list+" yazıyor");
+			});
+		});
+	</script>
+</body>
+</html>
