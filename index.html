@@ -40,7 +40,7 @@
 	<script src="/socket.io/socket.io.js"></script>
 	<script>
 		jQuery(function($){
-			var socket = io.connect();
+			var socket =new io.connect('http://chatappyazilimciakli.herokuapp.com/');
 			var $nickForm = $('#setNick');
 			var $nickError = $('#nickError');
 			var $nickBox = $('#nickname');
